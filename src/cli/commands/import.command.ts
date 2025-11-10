@@ -1,11 +1,14 @@
 import { Command } from './command.interface.js';
 import { TSVFileReader } from '../../shared/libs/file-reader/index.js';
 import { Offer } from '../../shared/types/index.js';
-import { DatabaseClient } from '../../shared/libs/database-client/index.js';
-import { UserService } from '../../shared/models/user/index.js';
-import { OfferService } from '../../shared/models/offer/index.js';
 import { PinoLogger } from '../../shared/libs/logger/pino-logger.js';
 import chalk from 'chalk';
+import 'reflect-metadata';
+import { initContainer } from '../../app/container.js';
+import { Component } from '../../shared/types/component.enum.js';
+import { IDatabaseClient } from '../../shared/libs/database-client/index.js';
+import { IUserService } from '../../shared/models/user/index.js';
+import { IOfferService } from '../../shared/models/offer/index.js';
 
 export class ImportCommand implements Command {
   getName(): string {
@@ -24,9 +27,11 @@ export class ImportCommand implements Command {
     process.env.MONGO_URL = dbUri || process.env.MONGO_URL || 'mongodb://admin:test@localhost:27017/six-cities';
 
     const logger = new PinoLogger();
-    const databaseClient = new DatabaseClient(logger);
-    const userService = new UserService();
-    const offerService = new OfferService();
+    const container = initContainer();
+    
+    const databaseClient = container.get<IDatabaseClient>(Component.DatabaseClient);
+    const userService = container.get<IUserService>(Component.UserService);
+    const offerService = container.get<IOfferService>(Component.OfferService);
 
     try {
       await databaseClient.connect();
@@ -50,16 +55,19 @@ export class ImportCommand implements Command {
           try {
             const user = await userService.findOrCreate(
               offer.author.email,
-              offer.author.name,
-              offer.author.lastName,
-              offer.author.password,
-              offer.author.avatarUrl,
-              offer.author.type
+              {
+                name: offer.author.name,
+                lastName: offer.author.lastName,
+                email: offer.author.email,
+                password: offer.author.password,
+                avatarUrl: offer.author.avatarUrl,
+                type: offer.author.type
+              }
             );
 
             const offerData = {
               ...offer,
-              author: user._id
+              userId: user._id?.toString()
             };
 
             await offerService.create(offerData as any);

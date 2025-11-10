@@ -1,6 +1,6 @@
 import { injectable, inject } from 'inversify';
 import { ILogger } from '../shared/libs/logger/index.js';
-import { Component } from '../types/component.enum.js';
+import { Component } from '../shared/types/component.enum.js';
 
 @injectable()
 export class Application {

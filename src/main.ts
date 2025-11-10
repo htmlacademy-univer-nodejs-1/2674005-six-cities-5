@@ -5,7 +5,7 @@ import { CLIApplication } from './cli/cli-application.js';
 import { HelpCommand, VersionCommand, ImportCommand, GenerateCommand } from './cli/commands/index.js';
 import { Application } from './app/application.js';
 import { initContainer } from './app/container.js';
-import { Component } from './types/component.enum.js';
+import { Component } from './shared/types/component.enum.js';
 import { PinoLogger } from './shared/libs/logger/index.js';
 
 config();

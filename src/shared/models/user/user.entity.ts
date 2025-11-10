@@ -1,31 +1,66 @@
-import { prop, getModelForClass, defaultClasses } from '@typegoose/typegoose';
-import { UserType } from '../../types/user-type.enum.js';
+import { prop, modelOptions } from '@typegoose/typegoose';
+import { UserType } from '../../types/index.js';
 
-export interface UserEntity extends defaultClasses.Base {}
-
-export class UserEntity extends defaultClasses.TimeStamps {
-  @prop({ required: true, trim: true })
-  public name!: string;
-
-  @prop({ required: true, trim: true })
-  public lastName!: string;
-
-  @prop({ required: true, unique: true, trim: true })
+@modelOptions({
+  schemaOptions: {
+    timestamps: true,
+    collection: 'users'
+  }
+})
+export class UserEntity {
+  @prop({
+    required: true,
+    unique: true,
+    type: String,
+    match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  })
   public email!: string;
 
-  @prop({ required: true })
+  @prop({
+    required: true,
+    type: String,
+    minlength: 1,
+    maxlength: 15
+  })
+  public name!: string;
+
+  @prop({
+    required: true,
+    type: String,
+    minlength: 1,
+    maxlength: 15
+  })
+  public lastName!: string;
+
+  @prop({
+    required: true,
+    type: String,
+    minlength: 6,
+    maxlength: 12
+  })
   public password!: string;
 
-  @prop({ required: true })
+  @prop({
+    required: true,
+    type: String
+  })
   public avatarUrl!: string;
 
-  @prop({ required: true, enum: UserType, default: UserType.Standard })
+  @prop({
+    required: true,
+    enum: UserType,
+    type: String,
+    default: UserType.Standard
+  })
   public type!: UserType;
-}
 
-export const UserModel = getModelForClass(UserEntity, { 
-  schemaOptions: { 
-    collection: 'users',
-    timestamps: true
-  } 
-});
+  @prop({
+    default: new Date()
+  })
+  public createdAt?: Date;
+
+  @prop({
+    default: new Date()
+  })
+  public updatedAt?: Date;
+}
