@@ -66,6 +66,14 @@ npm start
 
 В процессе запуска проекта будет выполнен процесс «Сборки проекта» и запуска результирующего кода.
 
+#### Запустить Mock Server
+
+```bash
+npm run mock:server
+```
+
+Запускает JSON Server на порту 3000 с тестовыми данными из `mocks/mock-server-data.json`.
+
 ## Структура проекта
 
 ### Директория `src`
@@ -89,9 +97,16 @@ npm start
 ### Команды
 
 ```bash
-node dist/main.js --help          # Справка по командам
-node dist/main.js --version       # Версия приложения
-node dist/main.js --import <path> # Импорт данных из TSV файла
+node dist/main.js --help                    # Справка по командам
+node dist/main.js --version                 # Версия приложения
+node dist/main.js --import <path>           # Импорт данных из TSV файла
+node dist/main.js --generate <n> <path> <url> # Генерация тестовых данных
+```
+
+Пример генерации:
+
+```bash
+node dist/main.js --generate 100 ./mocks/test.tsv http://localhost:3000/mock-data
 ```
 
 ### Формат TSV

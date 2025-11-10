@@ -1,94 +1,112 @@
 import { createReadStream } from 'node:fs';
-import { FileReader } from './file-reader.interface.js';
-import { Offer } from '../../types/index.js';
+import { EventEmitter } from 'node:events';
 import { createOffer, RawOffer } from './offer.factory.js';
 
-const CHUNK_SIZE = 16384; // 16KB
+const CHUNK_SIZE = 65536;
 
-export class TSVFileReader implements FileReader {
-  private rawData = '';
-
+export class TSVFileReader extends EventEmitter {
   constructor(
     public readonly filename: string
-  ) {}
-
-  private parseRawDataToOffers(): Offer[] {
-    return this.rawData
-      .split('\n')
-      .filter((row) => row.trim().length > 0)
-      .map((line) => line.split('\t'))
-      .map((parts) => {
-        const [
-          title,
-          description,
-          publishDate,
-          city,
-          previewImage,
-          images,
-          isPremium,
-          isFavorite,
-          rating,
-          type,
-          rooms,
-          guests,
-          price,
-          amenities,
-          userEmail,
-          userName,
-          userLastName,
-          userPassword,
-          userAvatar,
-          userType,
-          commentsCount,
-          location,
-        ] = parts;
-
-        return {
-          title,
-          description,
-          publishDate,
-          city,
-          previewImage,
-          images,
-          isPremium,
-          isFavorite,
-          rating,
-          type,
-          rooms,
-          guests,
-          price,
-          amenities,
-          userEmail,
-          userName,
-          userLastName,
-          userPassword,
-          userAvatar,
-          userType,
-          commentsCount,
-          location,
-        } as RawOffer;
-      })
-      .map((rawOffer) => createOffer(rawOffer))
-      .filter((offer): offer is Offer => offer !== null);
+  ) {
+    super();
   }
 
-  async read(): Promise<Offer[]> {
+  private parseLineToOffer(line: string): void {
+    const parts = line.split('\t');
+    const [
+      title,
+      description,
+      publishDate,
+      city,
+      previewImage,
+      images,
+      isPremium,
+      isFavorite,
+      rating,
+      type,
+      rooms,
+      guests,
+      price,
+      amenities,
+      userEmail,
+      userName,
+      userLastName,
+      userPassword,
+      userAvatar,
+      userType,
+      commentsCount,
+      location,
+    ] = parts;
+
+    const rawOffer: RawOffer = {
+      title,
+      description,
+      publishDate,
+      city,
+      previewImage,
+      images,
+      isPremium,
+      isFavorite,
+      rating,
+      type,
+      rooms,
+      guests,
+      price,
+      amenities,
+      userEmail,
+      userName,
+      userLastName,
+      userPassword,
+      userAvatar,
+      userType,
+      commentsCount,
+      location,
+    };
+
+    const offer = createOffer(rawOffer);
+    if (offer) {
+      this.emit('line', offer);
+    }
+  }
+
+  async read(): Promise<void> {
     const readStream = createReadStream(this.filename, {
       highWaterMark: CHUNK_SIZE,
       encoding: 'utf-8',
     });
 
+    let remainingData = '';
+    let nextLinePosition = -1;
+    let importedRowCount = 0;
+
     return new Promise((resolve, reject) => {
       readStream.on('data', (chunk: string) => {
-        this.rawData += chunk;
+        remainingData += chunk.toString();
+
+        while ((nextLinePosition = remainingData.indexOf('\n')) >= 0) {
+          const completeRow = remainingData.slice(0, nextLinePosition + 1);
+          remainingData = remainingData.slice(nextLinePosition + 1);
+          importedRowCount++;
+
+          const line = completeRow.replace(/\n/, '').trim();
+          if (line.length > 0) {
+            this.parseLineToOffer(line);
+          }
+        }
       });
 
       readStream.on('end', () => {
-        const offers = this.parseRawDataToOffers();
-        resolve(offers);
+        if (remainingData.trim().length > 0) {
+          this.parseLineToOffer(remainingData.trim());
+          importedRowCount++;
+        }
+
+        this.emit('end', importedRowCount);
+        resolve();
       });
 
       readStream.on('error', (err) => {
+        this.emit('error', err);
         reject(err);
       });
     });

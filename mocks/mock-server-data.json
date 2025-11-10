@@ -1,0 +1,102 @@
+{
+  "titles": [
+    "Cozy Studio Apartment",
+    "Luxury Penthouse Suite",
+    "Modern Loft Downtown",
+    "Charming Villa",
+    "Spacious Family House",
+    "Elegant City Apartment",
+    "Beautiful Seaside Room",
+    "Stylish Hotel Room"
+  ],
+  "descriptions": [
+    "A perfect place for a weekend getaway with all modern amenities and comfortable living space",
+    "Enjoy luxury living in this stunning property with breathtaking views and top-tier facilities",
+    "Modern and stylish accommodation in the heart of the city with excellent transport connections",
+    "Charming property with a beautiful garden and peaceful surroundings ideal for families",
+    "Spacious and bright living space with all the comforts you need for a memorable stay",
+    "Elegant and sophisticated interior design meets functionality in this prime location",
+    "Wake up to beautiful sea views and enjoy the tranquil atmosphere of this wonderful property",
+    "Contemporary design and premium amenities ensure your comfort throughout your entire stay"
+  ],
+  "cities": [
+    "Paris",
+    "Cologne",
+    "Brussels",
+    "Amsterdam",
+    "Hamburg",
+    "Dusseldorf"
+  ],
+  "previewImages": [
+    "apartment-preview.jpg",
+    "house-preview.jpg",
+    "room-preview.jpg",
+    "hotel-preview.jpg",
+    "studio-preview.jpg",
+    "villa-preview.jpg"
+  ],
+  "images": [
+    ["img1.jpg", "img2.jpg", "img3.jpg", "img4.jpg", "img5.jpg", "img6.jpg"],
+    ["photo1.jpg", "photo2.jpg", "photo3.jpg", "photo4.jpg", "photo5.jpg", "photo6.jpg"],
+    ["pic1.jpg", "pic2.jpg", "pic3.jpg", "pic4.jpg", "pic5.jpg", "pic6.jpg"],
+    ["image1.jpg", "image2.jpg", "image3.jpg", "image4.jpg", "image5.jpg", "image6.jpg"]
+  ],
+  "types": [
+    "Apartment",
+    "House",
+    "Room",
+    "Hotel"
+  ],
+  "amenities": [
+    ["WiFi", "Kitchen", "Heating", "Cable TV"],
+    ["Air conditioning", "Washer", "Fridge", "Breakfast"],
+    ["Baby seat", "Towels", "Laptop friendly workspace"],
+    ["WiFi", "Air conditioning", "Kitchen", "Washer", "Towels"],
+    ["Heating", "Fridge", "Breakfast", "Baby seat"]
+  ],
+  "users": [
+    {
+      "email": "john.doe@example.com",
+      "name": "John",
+      "lastName": "Doe",
+      "password": "password123",
+      "avatar": "avatar1.jpg"
+    },
+    {
+      "email": "jane.smith@example.com",
+      "name": "Jane",
+      "lastName": "Smith",
+      "password": "securepass456",
+      "avatar": "avatar2.jpg"
+    },
+    {
+      "email": "bob.wilson@example.com",
+      "name": "Bob",
+      "lastName": "Wilson",
+      "password": "mypass789",
+      "avatar": "avatar3.jpg"
+    },
+    {
+      "email": "alice.brown@example.com",
+      "name": "Alice",
+      "lastName": "Brown",
+      "password": "alicepass321",
+      "avatar": "avatar4.jpg"
+    },
+    {
+      "email": "charlie.davis@example.com",
+      "name": "Charlie",
+      "lastName": "Davis",
+      "password": "charlie654",
+      "avatar": "avatar5.jpg"
+    }
+  ],
+  "locations": [
+    { "latitude": 48.8566, "longitude": 2.3522 },
+    { "latitude": 50.9375, "longitude": 6.9603 },
+    { "latitude": 50.8476, "longitude": 4.3572 },
+    { "latitude": 52.3676, "longitude": 4.9041 },
+    { "latitude": 53.5511, "longitude": 9.9937 },
+    { "latitude": 51.2277, "longitude": 6.7735 }
+  ]
+}
