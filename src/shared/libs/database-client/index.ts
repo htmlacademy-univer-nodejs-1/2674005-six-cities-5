@@ -1,2 +1,3 @@
 export { IDatabaseClient } from './database-client.interface.js';
-export { DatabaseClient } from './mongodb.js';
+export { MongoDatabaseClient } from './mongo.database-client.js';
+

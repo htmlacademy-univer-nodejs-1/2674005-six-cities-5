@@ -1,3 +1,5 @@
-export { OfferEntity, OfferModel, LocationEntity } from './offer.entity.js';
-export { IOfferService } from './offer.service.interface.js';
-export { OfferService } from './offer-service.js';
+export { OfferEntity } from './offer.entity.js';
+export { DefaultOfferService } from './default-offer.service.js';
+export { IOfferService } from './offer-service.interface.js';
+export { CreateOfferDTO } from './create-offer.dto.js';
+export { UpdateOfferDTO } from './update-offer.dto.js';
