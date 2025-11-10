@@ -83,3 +83,24 @@ npm start
 ### Остальное
 
 Все остальные файлы в проекте являются служебными. Пожалуйста, не удаляйте и не изменяйте их самовольно. Только если того требует задание или наставник.
+
+## CLI Приложение
+
+### Команды
+
+```bash
+node dist/main.js --help          # Справка по командам
+node dist/main.js --version       # Версия приложения
+node dist/main.js --import <path> # Импорт данных из TSV файла
+```
+
+### Формат TSV
+
+Поля через TAB: title, description, publishDate, city, previewImage, images (6 шт через ;), isPremium, isFavorite, rating, type, rooms, guests, price, amenities (через ;), userEmail, userName, userLastName, userPassword, userAvatar, userType, commentsCount, location (lat;lon).
+
+### Структура
+
+- `src/cli/` - CLI приложение и команды
+- `src/shared/types/` - типы и енамы (City, HousingType, Amenity, User, Offer, Location)
+- `src/shared/libs/file-reader/` - чтение и парсинг TSV файлов
+- `mocks/offers.tsv` - тестовые данные
