@@ -115,4 +115,8 @@ export class DefaultOfferService implements IOfferService {
       { new: true }
     );
   }
+
+  async exists(documentId: string): Promise<boolean> {
+    return (await this.offerModel.exists({ _id: documentId })) !== null;
+  }
 }

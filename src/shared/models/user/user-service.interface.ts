@@ -2,8 +2,9 @@ import { DocumentType } from '@typegoose/typegoose';
 import { UserEntity } from './user.entity.js';
 import { CreateUserDTO } from './create-user.dto.js';
 import { UpdateUserDTO } from './update-user.dto.js';
+import { DocumentExists } from '../../libs/database-client/document-exists.interface.js';
 
-export interface IUserService {
+export interface IUserService extends DocumentExists {
   create(dto: CreateUserDTO): Promise<DocumentType<UserEntity>>;
   findByEmail(email: string): Promise<DocumentType<UserEntity> | null>;
   findById(userId: string): Promise<DocumentType<UserEntity> | null>;

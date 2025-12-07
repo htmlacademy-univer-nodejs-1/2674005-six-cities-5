@@ -9,11 +9,15 @@ import { Controller } from '../controller.interface.js';
 import { HttpMethod } from '../http-method.enum.js';
 import { ValidateObjectIdMiddleware } from '../middleware/validate-objectid.middleware.js';
 import { ValidateDtoMiddleware } from '../middleware/validate-dto.middleware.js';
+import { DocumentExistsMiddleware } from '../middleware/document-exists.middleware.js';
+import { UploadFileMiddleware } from '../middleware/upload-file.middleware.js';
+import { Config } from '../../shared/libs/config/config.js';
 
 @injectable()
 export class UserController extends BaseController implements Controller {
   constructor(
-    @inject(Component.UserService) private userService: IUserService
+    @inject(Component.UserService) private userService: IUserService,
+    @inject(Component.Config) private config: Config
   ) {
     super('/users');
     this.addRoute({
@@ -26,7 +30,10 @@ export class UserController extends BaseController implements Controller {
       path: '/:userId',
       method: HttpMethod.Get,
       handler: this.show,
-      middlewares: [new ValidateObjectIdMiddleware('userId')]
+      middlewares: [
+        new ValidateObjectIdMiddleware('userId'),
+        new DocumentExistsMiddleware(this.userService, 'User', 'userId')
+      ]
     });
     this.addRoute({
       path: '/:userId',
@@ -34,7 +41,18 @@ export class UserController extends BaseController implements Controller {
       handler: this.update,
       middlewares: [
         new ValidateObjectIdMiddleware('userId'),
-        new ValidateDtoMiddleware(UpdateUserDTO)
+        new ValidateDtoMiddleware(UpdateUserDTO),
+        new DocumentExistsMiddleware(this.userService, 'User', 'userId')
+      ]
+    });
+    this.addRoute({
+      path: '/:userId/avatar',
+      method: HttpMethod.Post,
+      handler: this.uploadAvatar,
+      middlewares: [
+        new ValidateObjectIdMiddleware('userId'),
+        new UploadFileMiddleware(this.config.uploadDirectory, 'avatar'),
+        new DocumentExistsMiddleware(this.userService, 'User', 'userId')
       ]
     });
   }
@@ -47,24 +65,26 @@ export class UserController extends BaseController implements Controller {
   async show(req: Request, res: Response): Promise<void> {
     const { userId } = req.params;
     const user = await this.userService.findById(userId);
-
-    if (!user) {
-      this.sendNotFound(res, `User with id ${userId} not found`);
-      return;
-    }
-
-    this.sendOk(res, user);
+    this.sendOk(res, user!);
   }
 
   async update(req: Request, res: Response): Promise<void> {
     const { userId } = req.params;
     const user = await this.userService.updateById(userId, req.body);
+    this.sendOk(res, user!);
+  }
 
-    if (!user) {
-      this.sendNotFound(res, `User with id ${userId} not found`);
+  async uploadAvatar(req: Request, res: Response): Promise<void> {
+    const { userId } = req.params;
+    const uploadFile = req.file;
+
+    if (!uploadFile) {
+      this.sendBadRequest(res, 'Avatar file is required');
       return;
     }
 
-    this.sendOk(res, user);
+    const avatarUrl = `/upload/${uploadFile.filename}`;
+    const updatedUser = await this.userService.updateById(userId, { avatarUrl });
+    this.sendOk(res, updatedUser!);
   }
 }

@@ -21,6 +21,7 @@ export class Application {
 
   private registerMiddleware(): void {
     this.express.use(express.json());
+    this.express.use('/upload', express.static(this.config.uploadDirectory));
   }
 
   private registerRoutes(controllers: Controller[]): void {

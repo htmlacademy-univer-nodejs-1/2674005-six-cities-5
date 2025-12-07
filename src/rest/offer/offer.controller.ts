@@ -9,6 +9,7 @@ import { Controller } from '../controller.interface.js';
 import { HttpMethod } from '../http-method.enum.js';
 import { ValidateObjectIdMiddleware } from '../middleware/validate-objectid.middleware.js';
 import { ValidateDtoMiddleware } from '../middleware/validate-dto.middleware.js';
+import { DocumentExistsMiddleware } from '../middleware/document-exists.middleware.js';
 
 @injectable()
 export class OfferController extends BaseController implements Controller {
@@ -31,7 +32,10 @@ export class OfferController extends BaseController implements Controller {
       path: '/:offerId',
       method: HttpMethod.Get,
       handler: this.show,
-      middlewares: [new ValidateObjectIdMiddleware('offerId')]
+      middlewares: [
+        new ValidateObjectIdMiddleware('offerId'),
+        new DocumentExistsMiddleware(this.offerService, 'Offer', 'offerId')
+      ]
     });
     this.addRoute({
       path: '/:offerId',
@@ -39,14 +43,18 @@ export class OfferController extends BaseController implements Controller {
       handler: this.update,
       middlewares: [
         new ValidateObjectIdMiddleware('offerId'),
-        new ValidateDtoMiddleware(UpdateOfferDTO)
+        new ValidateDtoMiddleware(UpdateOfferDTO),
+        new DocumentExistsMiddleware(this.offerService, 'Offer', 'offerId')
       ]
     });
     this.addRoute({
       path: '/:offerId',
       method: HttpMethod.Delete,
       handler: this.delete,
-      middlewares: [new ValidateObjectIdMiddleware('offerId')]
+      middlewares: [
+        new ValidateObjectIdMiddleware('offerId'),
+        new DocumentExistsMiddleware(this.offerService, 'Offer', 'offerId')
+      ]
     });
   }
 
@@ -72,25 +80,13 @@ export class OfferController extends BaseController implements Controller {
   async show(req: Request, res: Response): Promise<void> {
     const { offerId } = req.params;
     const offer = await this.offerService.findById(offerId);
-
-    if (!offer) {
-      this.sendNotFound(res, `Offer with id ${offerId} not found`);
-      return;
-    }
-
-    this.sendOk(res, offer);
+    this.sendOk(res, offer!);
   }
 
   async update(req: Request, res: Response): Promise<void> {
     const { offerId } = req.params;
     const offer = await this.offerService.updateById(offerId, req.body);
-
-    if (!offer) {
-      this.sendNotFound(res, `Offer with id ${offerId} not found`);
-      return;
-    }
-
-    this.sendOk(res, offer);
+    this.sendOk(res, offer!);
   }
 
   async delete(req: Request, res: Response): Promise<void> {

@@ -7,6 +7,7 @@ export type Config = {
     host: string;
   };
   salt: string;
+  uploadDirectory: string;
 };
 
 export function getConfig(): Config {
@@ -28,6 +29,11 @@ export function getConfig(): Config {
       env: 'SALT',
       default: '',
     },
+    uploadDirectory: {
+      format: String,
+      env: 'UPLOAD_DIRECTORY',
+      default: 'upload',
+    },
   });
 
   config.load({
@@ -36,6 +42,7 @@ export function getConfig(): Config {
       host: process.env.DB_HOST || '127.0.0.1',
     },
     salt: process.env.SALT || '',
+    uploadDirectory: process.env.UPLOAD_DIRECTORY || 'upload',
   });
 
   config.validate({ allowed: 'strict' });

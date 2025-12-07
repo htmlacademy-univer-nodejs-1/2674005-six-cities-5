@@ -1,0 +1,182 @@
+@baseUrl = http://localhost:4000
+@userId = 6935c2385b5887fa48acbc73
+@offerId = 6935bf1baf733f8d40423b98
+
+
+### Register User
+POST {{baseUrl}}/api/users/register
+Content-Type: application/json
+
+{
+  "name": "Ivan",
+  "lastName": "Petrov",
+  "email": "ivan@example.com",
+  "password": "123456",
+  "avatarUrl": "default.jpg",
+  "type": "standard"
+}
+
+
+### Get User by ID
+GET {{baseUrl}}/api/users/{{userId}}
+
+
+### Update User
+PUT {{baseUrl}}/api/users/{{userId}}
+Content-Type: application/json
+
+{
+  "name": "Updated Name",
+  "lastName": "Updated Last"
+}
+
+
+### Upload Avatar (multipart/form-data)
+POST {{baseUrl}}/api/users/{{userId}}/avatar
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="avatar"; filename="avatar.jpg"
+Content-Type: image/jpeg
+
+< ./markup/img/avatar-max.jpg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+
+### Create Offer
+POST {{baseUrl}}/api/offers
+Content-Type: application/json
+
+{
+  "title": "Beautiful apartment in Paris",
+  "description": "A nice place to stay in the city center with great views and modern amenities",
+  "city": "Paris",
+  "previewImage": "preview.jpg",
+  "images": ["img1.jpg", "img2.jpg", "img3.jpg", "img4.jpg", "img5.jpg", "img6.jpg"],
+  "isPremium": true,
+  "type": "Apartment",
+  "rooms": 3,
+  "guests": 4,
+  "price": 150,
+  "amenities": ["Breakfast", "Air conditioning"],
+  "userId": "6935bea89850f987f33cbba4",
+  "location": {
+    "latitude": 48.8566,
+    "longitude": 2.3522
+  }
+}
+
+
+### Get All Offers
+GET {{baseUrl}}/api/offers
+
+
+### Get All Offers with Limit
+GET {{baseUrl}}/api/offers?limit=10
+
+
+### Get Offers by City
+GET {{baseUrl}}/api/offers?city=Paris
+
+
+### Get Offer by ID
+GET {{baseUrl}}/api/offers/{{offerId}}
+
+
+### Update Offer
+PUT {{baseUrl}}/api/offers/{{offerId}}
+Content-Type: application/json
+
+{
+  "title": "Updated: Luxury apartment in Paris",
+  "price": 200
+}
+
+
+### Delete Offer
+DELETE {{baseUrl}}/api/offers/{{offerId}}
+
+
+### Create Comment
+POST {{baseUrl}}/api/comments
+Content-Type: application/json
+
+{
+  "text": "Great place to stay! Highly recommend for families.",
+  "rating": 5,
+  "offerId": "{{offerId}}",
+  "userId": "{{userId}}"
+}
+
+
+### Get Comments for Offer
+GET {{baseUrl}}/api/comments/{{offerId}}
+
+
+### Access Uploaded File
+GET {{baseUrl}}/upload/KeFYTmcXP5_EByM9G3Fuo.jpg
+
+
+### Invalid Email
+POST {{baseUrl}}/api/users/register
+Content-Type: application/json
+
+{
+  "name": "Test",
+  "lastName": "User",
+  "email": "invalid-email",
+  "password": "123456",
+  "avatarUrl": "avatar.jpg",
+  "type": "standard"
+}
+
+
+### Short Password
+POST {{baseUrl}}/api/users/register
+Content-Type: application/json
+
+{
+  "name": "Test",
+  "lastName": "User",
+  "email": "test@example.com",
+  "password": "123",
+  "avatarUrl": "avatar.jpg",
+  "type": "standard"
+}
+
+
+### Invalid ObjectID
+GET {{baseUrl}}/api/users/invalid-id
+
+
+### Non-existent User
+GET {{baseUrl}}/api/users/507f1f77bcf86cd799439011
+
+
+### Non-existent Offer
+GET {{baseUrl}}/api/offers/507f1f77bcf86cd799439011
+
+
+### Invalid Comment Rating
+POST {{baseUrl}}/api/comments
+Content-Type: application/json
+
+{
+  "text": "This is a valid comment text",
+  "rating": 10,
+  "offerId": "{{offerId}}",
+  "userId": "{{userId}}"
+}
+
+
+### Short Comment Text
+POST {{baseUrl}}/api/comments
+Content-Type: application/json
+
+{
+  "text": "Bad",
+  "rating": 5,
+  "offerId": "{{offerId}}",
+  "userId": "{{userId}}"
+}
+
