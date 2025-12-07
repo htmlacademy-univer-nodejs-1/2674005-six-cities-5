@@ -83,9 +83,9 @@ export class OfferEntity {
   public isFavorite!: boolean;
 
   @prop({
-    required: true,
+    required: false,
     type: Number,
-    min: 1,
+    min: 0,
     max: 5,
     default: 0
   })

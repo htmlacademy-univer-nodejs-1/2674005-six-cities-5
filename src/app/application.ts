@@ -5,6 +5,7 @@ import { Component } from '../shared/types/component.enum.js';
 import { Config } from '../shared/libs/config/config.js';
 import { ExceptionFilter } from '../rest/exception-filter.js';
 import { Controller } from '../rest/controller.interface.js';
+import { IDatabaseClient } from '../shared/libs/database-client/database-client.interface.js';
 
 @injectable()
 export class Application {
@@ -12,7 +13,8 @@ export class Application {
 
   constructor(
     @inject(Component.Logger) private logger: ILogger,
-    @inject(Component.Config) private config: Config
+    @inject(Component.Config) private config: Config,
+    @inject(Component.DatabaseClient) private databaseClient: IDatabaseClient
   ) {
     this.express = express();
   }
@@ -23,7 +25,7 @@ export class Application {
 
   private registerRoutes(controllers: Controller[]): void {
     controllers.forEach((controller) => {
-      this.express.use('/api', controller.router);
+      this.express.use(`/api${controller.basePath}`, controller.router);
     });
   }
 
@@ -35,6 +37,10 @@ export class Application {
 
   async init(controllers: Controller[]): Promise<void> {
     this.logger.info('Application initialization');
+
+    await this.databaseClient.connect();
+    this.logger.info('Database connection established');
+
     this.registerMiddleware();
     this.logger.info('Middleware initialized');
 

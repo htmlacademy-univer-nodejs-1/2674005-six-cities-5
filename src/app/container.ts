@@ -9,6 +9,7 @@ import { Application } from './application.js';
 import { getConfig, type Config } from '../shared/libs/config/config.js';
 import { UserController } from '../rest/user/user.controller.js';
 import { OfferController } from '../rest/offer/offer.controller.js';
+import { CommentController } from '../rest/comment/comment.controller.js';
 
 export function initContainer(): Container {
   const container = new Container();
@@ -21,6 +22,7 @@ export function initContainer(): Container {
   container.bind<IOfferService>(Component.OfferService).to(DefaultOfferService).inSingletonScope();
   container.bind<UserController>(UserController).to(UserController).inSingletonScope();
   container.bind<OfferController>(OfferController).to(OfferController).inSingletonScope();
+  container.bind<CommentController>(CommentController).to(CommentController).inSingletonScope();
   container.bind<Application>(Application).toSelf().inSingletonScope();
 
   return container;

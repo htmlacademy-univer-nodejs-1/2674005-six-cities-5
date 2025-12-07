@@ -9,6 +9,7 @@ import { Component } from './shared/types/component.enum.js';
 import { PinoLogger } from './shared/libs/logger/index.js';
 import { UserController } from './rest/user/user.controller.js';
 import { OfferController } from './rest/offer/offer.controller.js';
+import { CommentController } from './rest/comment/comment.controller.js';
 
 config();
 
@@ -35,6 +36,7 @@ async function bootstrap() {
   const controllers = [
     container.get<UserController>(UserController),
     container.get<OfferController>(OfferController),
+    container.get<CommentController>(CommentController),
   ];
 
   await app.init(controllers);
