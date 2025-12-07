@@ -18,11 +18,11 @@ class LocationData {
     collection: 'offers'
   }
 })
-@pre<OfferEntity>('findOne', function() {
-  this.populate('userId');
+@pre('findOne', function() {
+  (this as any).populate('userId');
 })
-@pre<OfferEntity>('find', function() {
-  this.populate('userId');
+@pre('find', function() {
+  (this as any).populate('userId');
 })
 export class OfferEntity {
   @prop({

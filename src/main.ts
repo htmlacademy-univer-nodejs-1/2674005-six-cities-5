@@ -26,12 +26,12 @@ function bootstrapCLI() {
 
 async function bootstrap() {
   const container = initContainer();
-  
+
   const app = container.get<Application>(Application);
   const logger = container.get<PinoLogger>(Component.Logger);
 
   logger.info('Server starting...');
-  
+
   const controllers = [
     container.get<UserController>(UserController),
     container.get<OfferController>(OfferController),

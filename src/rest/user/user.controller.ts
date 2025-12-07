@@ -36,7 +36,7 @@ export class UserController extends BaseController implements Controller {
   private async show(req: Request, res: Response): Promise<void> {
     const { userId } = req.params;
     const user = await this.userService.findById(userId);
-    
+
     if (!user) {
       this.sendNotFound(res, `User with id ${userId} not found`);
       return;
