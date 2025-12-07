@@ -1,5 +1,6 @@
 import { prop, modelOptions } from '@typegoose/typegoose';
 import { UserType } from '../../types/index.js';
+import { createHash } from 'node:crypto';
 
 @modelOptions({
   schemaOptions: {
@@ -34,9 +35,7 @@ export class UserEntity {
 
   @prop({
     required: true,
-    type: String,
-    minlength: 6,
-    maxlength: 12
+    type: String
   })
   public password!: string;
 
@@ -63,4 +62,19 @@ export class UserEntity {
     default: new Date()
   })
   public updatedAt?: Date;
+
+  @prop({
+    type: () => [String],
+    default: []
+  })
+  public favoriteOffers!: string[];
+
+  public setPassword(password: string, salt: string): void {
+    this.password = createHash('sha256').update(password + salt).digest('hex');
+  }
+
+  public verifyPassword(password: string, salt: string): boolean {
+    const hashPassword = createHash('sha256').update(password + salt).digest('hex');
+    return this.password === hashPassword;
+  }
 }

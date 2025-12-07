@@ -8,11 +8,14 @@ import { Controller } from '../controller.interface.js';
 import { HttpMethod } from '../http-method.enum.js';
 import { ValidateObjectIdMiddleware } from '../middleware/validate-objectid.middleware.js';
 import { ValidateDtoMiddleware } from '../middleware/validate-dto.middleware.js';
+import { PrivateRouteMiddleware } from '../middleware/private-route.middleware.js';
+import { AuthService } from '../../shared/libs/auth/auth-service.interface.js';
 
 @injectable()
 export class CommentController extends BaseController implements Controller {
   constructor(
-    @inject(Component.CommentService) private commentService: ICommentService
+    @inject(Component.CommentService) private commentService: ICommentService,
+    @inject(Component.AuthService) private authService: AuthService
   ) {
     super('/comments');
     this.addRoute({
@@ -25,7 +28,10 @@ export class CommentController extends BaseController implements Controller {
       path: '/',
       method: HttpMethod.Post,
       handler: this.create,
-      middlewares: [new ValidateDtoMiddleware(CreateCommentDTO)]
+      middlewares: [
+        new PrivateRouteMiddleware(this.authService),
+        new ValidateDtoMiddleware(CreateCommentDTO)
+      ]
     });
   }
 
@@ -36,7 +42,9 @@ export class CommentController extends BaseController implements Controller {
   }
 
   async create(req: Request, res: Response): Promise<void> {
-    const comment = await this.commentService.create(req.body);
+    const dto: CreateCommentDTO = req.body;
+    dto.userId = req.tokenPayload!.id;
+    const comment = await this.commentService.create(dto);
     this.sendCreated(res, comment);
   }
 }

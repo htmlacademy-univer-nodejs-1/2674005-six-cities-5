@@ -4,5 +4,6 @@ export enum Component {
   DatabaseClient = 'DatabaseClient',
   UserService = 'UserService',
   CommentService = 'CommentService',
-  OfferService = 'OfferService'
+  OfferService = 'OfferService',
+  AuthService = 'AuthService'
 }

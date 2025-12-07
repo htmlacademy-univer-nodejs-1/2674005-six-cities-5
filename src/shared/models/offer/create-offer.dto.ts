@@ -57,10 +57,9 @@ export class CreateOfferDTO {
   @IsString({ each: true, message: 'each amenity must be a string' })
   public amenities!: string[];
 
-  @IsString({ message: 'userId is required' })
-  public userId!: string;
-
   @ValidateNested()
   @Type(() => Location)
   public location!: Location;
+
+  public userId?: string;
 }

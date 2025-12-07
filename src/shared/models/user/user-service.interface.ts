@@ -10,4 +10,7 @@ export interface IUserService extends DocumentExists {
   findById(userId: string): Promise<DocumentType<UserEntity> | null>;
   findOrCreate(email: string, dto: CreateUserDTO): Promise<DocumentType<UserEntity>>;
   updateById(userId: string, dto: UpdateUserDTO): Promise<DocumentType<UserEntity> | null>;
+  addToFavorites(userId: string, offerId: string): Promise<DocumentType<UserEntity> | null>;
+  removeFromFavorites(userId: string, offerId: string): Promise<DocumentType<UserEntity> | null>;
+  getFavoriteOffers(userId: string): Promise<string[]>;
 }

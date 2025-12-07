@@ -8,6 +8,7 @@ export type Config = {
   };
   salt: string;
   uploadDirectory: string;
+  jwtSecret: string;
 };
 
 export function getConfig(): Config {
@@ -34,6 +35,11 @@ export function getConfig(): Config {
       env: 'UPLOAD_DIRECTORY',
       default: 'upload',
     },
+    jwtSecret: {
+      format: String,
+      env: 'JWT_SECRET',
+      default: '',
+    },
   });
 
   config.load({
@@ -43,6 +49,7 @@ export function getConfig(): Config {
     },
     salt: process.env.SALT || '',
     uploadDirectory: process.env.UPLOAD_DIRECTORY || 'upload',
+    jwtSecret: process.env.JWT_SECRET || '',
   });
 
   config.validate({ allowed: 'strict' });

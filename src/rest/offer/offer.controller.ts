@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { injectable, inject } from 'inversify';
 import { BaseController } from '../base-controller.js';
 import { IOfferService } from '../../shared/models/offer/offer-service.interface.js';
+import { IUserService } from '../../shared/models/user/user-service.interface.js';
 import { CreateOfferDTO } from '../../shared/models/offer/create-offer.dto.js';
 import { UpdateOfferDTO } from '../../shared/models/offer/update-offer.dto.js';
 import { Component } from '../../shared/types/component.enum.js';
@@ -10,11 +11,15 @@ import { HttpMethod } from '../http-method.enum.js';
 import { ValidateObjectIdMiddleware } from '../middleware/validate-objectid.middleware.js';
 import { ValidateDtoMiddleware } from '../middleware/validate-dto.middleware.js';
 import { DocumentExistsMiddleware } from '../middleware/document-exists.middleware.js';
+import { PrivateRouteMiddleware } from '../middleware/private-route.middleware.js';
+import { AuthService } from '../../shared/libs/auth/auth-service.interface.js';
 
 @injectable()
 export class OfferController extends BaseController implements Controller {
   constructor(
-    @inject(Component.OfferService) private offerService: IOfferService
+    @inject(Component.OfferService) private offerService: IOfferService,
+    @inject(Component.AuthService) private authService: AuthService,
+    @inject(Component.UserService) private userService: IUserService
   ) {
     super('/offers');
     this.addRoute({
@@ -26,7 +31,16 @@ export class OfferController extends BaseController implements Controller {
       path: '/',
       method: HttpMethod.Post,
       handler: this.create,
-      middlewares: [new ValidateDtoMiddleware(CreateOfferDTO)]
+      middlewares: [
+        new PrivateRouteMiddleware(this.authService),
+        new ValidateDtoMiddleware(CreateOfferDTO)
+      ]
+    });
+    this.addRoute({
+      path: '/favorites',
+      method: HttpMethod.Get,
+      handler: this.getFavorites,
+      middlewares: [new PrivateRouteMiddleware(this.authService)]
     });
     this.addRoute({
       path: '/:offerId',
@@ -42,6 +56,7 @@ export class OfferController extends BaseController implements Controller {
       method: HttpMethod.Put,
       handler: this.update,
       middlewares: [
+        new PrivateRouteMiddleware(this.authService),
         new ValidateObjectIdMiddleware('offerId'),
         new ValidateDtoMiddleware(UpdateOfferDTO),
         new DocumentExistsMiddleware(this.offerService, 'Offer', 'offerId')
@@ -52,6 +67,27 @@ export class OfferController extends BaseController implements Controller {
       method: HttpMethod.Delete,
       handler: this.delete,
       middlewares: [
+        new PrivateRouteMiddleware(this.authService),
+        new ValidateObjectIdMiddleware('offerId'),
+        new DocumentExistsMiddleware(this.offerService, 'Offer', 'offerId')
+      ]
+    });
+    this.addRoute({
+      path: '/:offerId/favorite',
+      method: HttpMethod.Post,
+      handler: this.addToFavorites,
+      middlewares: [
+        new PrivateRouteMiddleware(this.authService),
+        new ValidateObjectIdMiddleware('offerId'),
+        new DocumentExistsMiddleware(this.offerService, 'Offer', 'offerId')
+      ]
+    });
+    this.addRoute({
+      path: '/:offerId/favorite',
+      method: HttpMethod.Delete,
+      handler: this.removeFromFavorites,
+      middlewares: [
+        new PrivateRouteMiddleware(this.authService),
         new ValidateObjectIdMiddleware('offerId'),
         new DocumentExistsMiddleware(this.offerService, 'Offer', 'offerId')
       ]
@@ -73,7 +109,9 @@ export class OfferController extends BaseController implements Controller {
   }
 
   async create(req: Request, res: Response): Promise<void> {
-    const offer = await this.offerService.create(req.body);
+    const dto: CreateOfferDTO = req.body;
+    dto.userId = req.tokenPayload!.id;
+    const offer = await this.offerService.create(dto);
     this.sendCreated(res, offer);
   }
 
@@ -93,5 +131,27 @@ export class OfferController extends BaseController implements Controller {
     const { offerId } = req.params;
     await this.offerService.deleteById(offerId);
     this.sendNoContent(res);
+  }
+
+  async getFavorites(req: Request, res: Response): Promise<void> {
+    const userId = req.tokenPayload!.id;
+    const favoriteOffers = await this.userService.getFavoriteOffers(userId);
+    this.sendOk(res, favoriteOffers);
+  }
+
+  async addToFavorites(req: Request, res: Response): Promise<void> {
+    const userId = req.tokenPayload!.id;
+    const { offerId } = req.params;
+    await this.userService.addToFavorites(userId, offerId);
+    const offer = await this.offerService.findById(offerId);
+    this.sendOk(res, offer!);
+  }
+
+  async removeFromFavorites(req: Request, res: Response): Promise<void> {
+    const userId = req.tokenPayload!.id;
+    const { offerId } = req.params;
+    await this.userService.removeFromFavorites(userId, offerId);
+    const offer = await this.offerService.findById(offerId);
+    this.sendOk(res, offer!);
   }
 }

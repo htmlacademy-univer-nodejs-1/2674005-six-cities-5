@@ -1,7 +1,7 @@
 @baseUrl = http://localhost:4000
 @userId = 6935c2385b5887fa48acbc73
-@offerId = 6935bf1baf733f8d40423b98
-
+@offerId = 6935cb1cc2d06ab173a4930a
+@token = YOUR_JWT_TOKEN_HERE
 
 ### Register User
 POST {{baseUrl}}/api/users/register
@@ -43,9 +43,25 @@ Content-Type: image/jpeg
 ------WebKitFormBoundary7MA4YWxkTrZu0gW--
 
 
-### Create Offer
+### Login User
+POST {{baseUrl}}/api/users/login
+Content-Type: application/json
+
+{
+  "email": "ivan@example.com",
+  "password": "123456"
+}
+
+
+### Check Authentication Status
+GET {{baseUrl}}/api/users/check
+Authorization: Bearer {{token}}
+
+
+### Create Offer (requires auth)
 POST {{baseUrl}}/api/offers
 Content-Type: application/json
+Authorization: Bearer {{token}}
 
 {
   "title": "Beautiful apartment in Paris",
@@ -59,7 +75,6 @@ Content-Type: application/json
   "guests": 4,
   "price": 150,
   "amenities": ["Breakfast", "Air conditioning"],
-  "userId": "6935bea89850f987f33cbba4",
   "location": {
     "latitude": 48.8566,
     "longitude": 2.3522
@@ -83,9 +98,10 @@ GET {{baseUrl}}/api/offers?city=Paris
 GET {{baseUrl}}/api/offers/{{offerId}}
 
 
-### Update Offer
+### Update Offer (requires auth)
 PUT {{baseUrl}}/api/offers/{{offerId}}
 Content-Type: application/json
+Authorization: Bearer {{token}}
 
 {
   "title": "Updated: Luxury apartment in Paris",
@@ -93,19 +109,35 @@ Content-Type: application/json
 }
 
 
-### Delete Offer
+### Delete Offer (requires auth)
 DELETE {{baseUrl}}/api/offers/{{offerId}}
+Authorization: Bearer {{token}}
 
 
-### Create Comment
+### Get Favorite Offers (requires auth)
+GET {{baseUrl}}/api/offers/favorites
+Authorization: Bearer {{token}}
+
+
+### Add Offer to Favorites (requires auth)
+POST {{baseUrl}}/api/offers/{{offerId}}/favorite
+Authorization: Bearer {{token}}
+
+
+### Remove Offer from Favorites (requires auth)
+DELETE {{baseUrl}}/api/offers/{{offerId}}/favorite
+Authorization: Bearer {{token}}
+
+
+### Create Comment (requires auth)
 POST {{baseUrl}}/api/comments
 Content-Type: application/json
+Authorization: Bearer {{token}}
 
 {
   "text": "Great place to stay! Highly recommend for families.",
   "rating": 5,
-  "offerId": "{{offerId}}",
-  "userId": "{{userId}}"
+  "offerId": "{{offerId}}"
 }
 
 
@@ -160,23 +192,71 @@ GET {{baseUrl}}/api/offers/507f1f77bcf86cd799439011
 ### Invalid Comment Rating
 POST {{baseUrl}}/api/comments
 Content-Type: application/json
+Authorization: Bearer {{token}}
 
 {
   "text": "This is a valid comment text",
   "rating": 10,
-  "offerId": "{{offerId}}",
-  "userId": "{{userId}}"
+  "offerId": "{{offerId}}"
 }
 
 
 ### Short Comment Text
 POST {{baseUrl}}/api/comments
 Content-Type: application/json
+Authorization: Bearer {{token}}
 
 {
   "text": "Bad",
   "rating": 5,
-  "offerId": "{{offerId}}",
-  "userId": "{{userId}}"
+  "offerId": "{{offerId}}"
 }
+
+
+### Try to Create Offer without Auth (should fail with 401)
+POST {{baseUrl}}/api/offers
+Content-Type: application/json
+
+{
+  "title": "Unauthorized offer",
+  "description": "This should not be created without authentication",
+  "city": "Paris",
+  "previewImage": "preview.jpg",
+  "images": ["img1.jpg", "img2.jpg", "img3.jpg", "img4.jpg", "img5.jpg", "img6.jpg"],
+  "isPremium": false,
+  "type": "Apartment",
+  "rooms": 2,
+  "guests": 2,
+  "price": 100,
+  "amenities": ["Wi-Fi"],
+  "location": {
+    "latitude": 48.8566,
+    "longitude": 2.3522
+  }
+}
+
+
+### Try to Create Comment without Auth (should fail with 401)
+POST {{baseUrl}}/api/comments
+Content-Type: application/json
+
+{
+  "text": "Unauthorized comment should not work",
+  "rating": 4,
+  "offerId": "{{offerId}}"
+}
+
+
+### Login with Invalid Credentials (should fail with 401)
+POST {{baseUrl}}/api/users/login
+Content-Type: application/json
+
+{
+  "email": "ivan@example.com",
+  "password": "wrongpassword"
+}
+
+
+### Check Auth without Token (should fail with 401)
+GET {{baseUrl}}/api/users/check
 

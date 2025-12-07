@@ -7,19 +7,25 @@ import { CreateUserDTO } from './create-user.dto.js';
 import { UpdateUserDTO } from './update-user.dto.js';
 import { Component } from '../../types/component.enum.js';
 import { ILogger } from '../../libs/logger/index.js';
+import { Config } from '../../libs/config/config.js';
 
 @injectable()
 export class DefaultUserService implements IUserService {
   private userModel = getModelForClass(UserEntity);
 
   constructor(
-    @inject(Component.Logger) private logger: ILogger
+    @inject(Component.Logger) private logger: ILogger,
+    @inject(Component.Config) private config: Config
   ) {}
 
   async create(dto: CreateUserDTO): Promise<DocumentType<UserEntity>> {
-    const user = await this.userModel.create(dto);
-    this.logger.info(`User created: ${user.email}`);
-    return user;
+    const user = new UserEntity();
+    Object.assign(user, dto);
+    user.setPassword(dto.password, this.config.salt);
+
+    const newUser = await this.userModel.create(user);
+    this.logger.info(`User created: ${newUser.email}`);
+    return newUser;
   }
 
   async findByEmail(email: string): Promise<DocumentType<UserEntity> | null> {
@@ -52,5 +58,38 @@ export class DefaultUserService implements IUserService {
 
   async exists(documentId: string): Promise<boolean> {
     return (await this.userModel.exists({ _id: documentId })) !== null;
+  }
+
+  async addToFavorites(userId: string, offerId: string): Promise<DocumentType<UserEntity> | null> {
+    const user = await this.userModel.findByIdAndUpdate(
+      userId,
+      { $addToSet: { favoriteOffers: offerId } },
+      { new: true }
+    );
+
+    if (user) {
+      this.logger.info(`Offer ${offerId} added to favorites for user ${userId}`);
+    }
+
+    return user;
+  }
+
+  async removeFromFavorites(userId: string, offerId: string): Promise<DocumentType<UserEntity> | null> {
+    const user = await this.userModel.findByIdAndUpdate(
+      userId,
+      { $pull: { favoriteOffers: offerId } },
+      { new: true }
+    );
+
+    if (user) {
+      this.logger.info(`Offer ${offerId} removed from favorites for user ${userId}`);
+    }
+
+    return user;
+  }
+
+  async getFavoriteOffers(userId: string): Promise<string[]> {
+    const user = await this.userModel.findById(userId);
+    return user?.favoriteOffers || [];
   }
 }

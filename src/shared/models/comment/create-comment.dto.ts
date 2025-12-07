@@ -10,9 +10,8 @@ export class CreateCommentDTO {
   @Max(5, { message: 'rating must be at most 5' })
   public rating!: number;
 
-  @IsString({ message: 'userId is required' })
-  public userId!: string;
-
   @IsString({ message: 'offerId is required' })
   public offerId!: string;
+
+  public userId?: string;
 }

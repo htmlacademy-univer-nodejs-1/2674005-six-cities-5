@@ -7,6 +7,7 @@ import { DefaultOfferService, IOfferService } from '../shared/models/offer/index
 import { DefaultCommentService, ICommentService } from '../shared/models/comment/index.js';
 import { UserController } from './user/user.controller.js';
 import { OfferController } from './offer/offer.controller.js';
+import { CommentController } from './comment/comment.controller.js';
 
 export function initContainer(): Container {
   const container = new Container();
@@ -18,6 +19,7 @@ export function initContainer(): Container {
   container.bind<IOfferService>(Component.OfferService).to(DefaultOfferService).inSingletonScope();
   container.bind<UserController>(UserController).to(UserController).inSingletonScope();
   container.bind<OfferController>(OfferController).to(OfferController).inSingletonScope();
+  container.bind<CommentController>(CommentController).to(CommentController).inSingletonScope();
 
   return container;
 }
