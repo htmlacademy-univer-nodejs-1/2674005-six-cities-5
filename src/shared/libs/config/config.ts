@@ -18,7 +18,7 @@ export function getConfig(): Config {
     },
     db: {
       host: {
-        format: 'ipaddress',
+        format: String,
         env: 'DB_HOST',
         default: '127.0.0.1',
       },

@@ -1,14 +1,52 @@
+import express, { Express } from 'express';
 import { injectable, inject } from 'inversify';
 import { ILogger } from '../shared/libs/logger/index.js';
 import { Component } from '../shared/types/component.enum.js';
+import { Config } from '../shared/libs/config/config.js';
+import { ExceptionFilter } from '../rest/exception-filter.js';
+import { Controller } from '../rest/controller.interface.js';
 
 @injectable()
 export class Application {
-  constructor(
-    @inject(Component.Logger) private logger: ILogger
-  ) {}
+  private express: Express;
 
-  async init(): Promise<void> {
-    this.logger.info('Application initialized');
+  constructor(
+    @inject(Component.Logger) private logger: ILogger,
+    @inject(Component.Config) private config: Config
+  ) {
+    this.express = express();
+  }
+
+  private registerMiddleware(): void {
+    this.express.use(express.json());
+  }
+
+  private registerRoutes(controllers: Controller[]): void {
+    controllers.forEach((controller) => {
+      this.express.use('/api', controller.router);
+    });
+  }
+
+  private registerExceptionFilter(exceptionFilter: ExceptionFilter): void {
+    this.express.use((error: Error, _req: express.Request, res: express.Response, next: express.NextFunction) => {
+      exceptionFilter.catch(error, _req, res, next);
+    });
+  }
+
+  async init(controllers: Controller[]): Promise<void> {
+    this.logger.info('Application initialization');
+    this.registerMiddleware();
+    this.logger.info('Middleware initialized');
+
+    this.registerRoutes(controllers);
+    this.logger.info('Routes initialized');
+
+    const exceptionFilter = new ExceptionFilter(this.logger);
+    this.registerExceptionFilter(exceptionFilter);
+    this.logger.info('Exception filter initialized');
+
+    this.express.listen(this.config.port, () => {
+      this.logger.info(`Server started on http://localhost:${this.config.port}`);
+    });
   }
 }

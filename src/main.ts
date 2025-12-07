@@ -7,6 +7,8 @@ import { Application } from './app/application.js';
 import { initContainer } from './app/container.js';
 import { Component } from './shared/types/component.enum.js';
 import { PinoLogger } from './shared/libs/logger/index.js';
+import { UserController } from './rest/user/user.controller.js';
+import { OfferController } from './rest/offer/offer.controller.js';
 
 config();
 
@@ -24,11 +26,18 @@ function bootstrapCLI() {
 
 async function bootstrap() {
   const container = initContainer();
+
   const app = container.get<Application>(Application);
   const logger = container.get<PinoLogger>(Component.Logger);
 
   logger.info('Server starting...');
-  await app.init();
+
+  const controllers = [
+    container.get<UserController>(UserController),
+    container.get<OfferController>(OfferController),
+  ];
+
+  await app.init(controllers);
 }
 
 if (process.argv[2]) {

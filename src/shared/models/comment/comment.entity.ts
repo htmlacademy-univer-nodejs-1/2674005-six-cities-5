@@ -8,11 +8,11 @@ import { OfferEntity } from '../offer/offer.entity.js';
     collection: 'comments'
   }
 })
-@pre<CommentEntity>('findOne', function() {
-  this.populate('userId');
+@pre('findOne', function() {
+  (this as any).populate('userId');
 })
-@pre<CommentEntity>('find', function() {
-  this.populate('userId');
+@pre('find', function() {
+  (this as any).populate('userId');
 })
 export class CommentEntity {
   @prop({

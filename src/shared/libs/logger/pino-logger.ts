@@ -1,4 +1,5 @@
 import pino from 'pino';
+import { injectable } from 'inversify';
 
 export interface ILogger {
   info(message: string, ...args: unknown[]): void;
@@ -7,6 +8,7 @@ export interface ILogger {
   debug(message: string, ...args: unknown[]): void;
 }
 
+@injectable()
 export class PinoLogger implements ILogger {
   private logger = pino();
 

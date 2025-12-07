@@ -28,7 +28,7 @@ export class ImportCommand implements Command {
 
     const logger = new PinoLogger();
     const container = initContainer();
-    
+
     const databaseClient = container.get<IDatabaseClient>(Component.DatabaseClient);
     const userService = container.get<IUserService>(Component.UserService);
     const offerService = container.get<IOfferService>(Component.OfferService);
@@ -50,7 +50,7 @@ export class ImportCommand implements Command {
 
       fileReader.on('end', async (count: number) => {
         console.log(chalk.blue(`Начинаем импорт ${offers.length} предложений...`));
-        
+
         for (const offer of offers) {
           try {
             const user = await userService.findOrCreate(
@@ -72,7 +72,7 @@ export class ImportCommand implements Command {
 
             await offerService.create(offerData as any);
             importedCount++;
-            
+
             console.log(chalk.green(`✓ Импортировано: ${offer.title}`));
           } catch (error) {
             console.error(chalk.red(`✗ Ошибка при импорте: ${offer.title}`));
@@ -82,25 +82,24 @@ export class ImportCommand implements Command {
 
         console.log(chalk.green(`\n✓ Процесс завершен. Обработано строк: ${count}, Успешно импортировано: ${importedCount}\n`));
         await databaseClient.disconnect();
-        process.exit(0);
       });
 
       fileReader.on('error', (error: Error) => {
         console.error(chalk.red(`\n✗ Ошибка при чтении файла ${filename}`));
         console.error(chalk.red(error.message));
-        process.exit(1);
+        throw error;
       });
 
       await fileReader.read();
 
     } catch (error) {
-      console.error(chalk.red(`\n✗ Ошибка при импорте данных`));
+      console.error(chalk.red('\n✗ Ошибка при импорте данных'));
       if (error instanceof Error) {
         console.error(chalk.red(error.message));
         logger.error(`Import failed: ${error.message}`);
       }
       await databaseClient.disconnect();
-      process.exit(1);
+      throw error;
     }
   }
 }
