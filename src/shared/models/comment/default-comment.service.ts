@@ -7,13 +7,13 @@ import { CreateCommentDTO } from './create-comment.dto.js';
 import { Component } from '../../types/component.enum.js';
 import { ILogger } from '../../libs/logger/index.js';
 
+const MAX_COMMENTS_COUNT = 50;
+
 @injectable()
 export class DefaultCommentService implements ICommentService {
   private commentModel = getModelForClass(CommentEntity);
 
-  constructor(
-    @inject(Component.Logger) private logger: ILogger
-  ) {}
+  constructor(@inject(Component.Logger) private logger: ILogger) {}
 
   async create(dto: CreateCommentDTO): Promise<DocumentType<CommentEntity>> {
     const comment = await this.commentModel.create(dto);
@@ -24,7 +24,8 @@ export class DefaultCommentService implements ICommentService {
   async findByOfferId(offerId: string): Promise<DocumentType<CommentEntity>[]> {
     const comments = await this.commentModel
       .find({ offerId })
-      .sort({ publishDate: -1 });
+      .sort({ publishDate: -1 })
+      .limit(MAX_COMMENTS_COUNT);
     return comments;
   }
 
@@ -35,7 +36,9 @@ export class DefaultCommentService implements ICommentService {
 
   async deleteByOfferId(offerId: string): Promise<number> {
     const result = await this.commentModel.deleteMany({ offerId });
-    this.logger.info(`${result.deletedCount} comments deleted for offer ${offerId}`);
+    this.logger.info(
+      `${result.deletedCount} comments deleted for offer ${offerId}`,
+    );
     return result.deletedCount || 0;
   }
 }

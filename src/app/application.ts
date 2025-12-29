@@ -1,4 +1,6 @@
 import express, { Express } from 'express';
+import cors from 'cors';
+import { existsSync, mkdirSync } from 'node:fs';
 import { injectable, inject } from 'inversify';
 import { ILogger } from '../shared/libs/logger/index.js';
 import { Component } from '../shared/types/component.enum.js';
@@ -14,12 +16,13 @@ export class Application {
   constructor(
     @inject(Component.Logger) private logger: ILogger,
     @inject(Component.Config) private config: Config,
-    @inject(Component.DatabaseClient) private databaseClient: IDatabaseClient
+    @inject(Component.DatabaseClient) private databaseClient: IDatabaseClient,
   ) {
     this.express = express();
   }
 
   private registerMiddleware(): void {
+    this.express.use(cors());
     this.express.use(express.json());
     this.express.use('/upload', express.static(this.config.uploadDirectory));
   }
@@ -31,9 +34,16 @@ export class Application {
   }
 
   private registerExceptionFilter(exceptionFilter: ExceptionFilter): void {
-    this.express.use((error: Error, _req: express.Request, res: express.Response, next: express.NextFunction) => {
-      exceptionFilter.catch(error, _req, res, next);
-    });
+    this.express.use(
+      (
+        error: Error,
+        _req: express.Request,
+        res: express.Response,
+        next: express.NextFunction,
+      ) => {
+        exceptionFilter.catch(error, _req, res, next);
+      },
+    );
   }
 
   async init(controllers: Controller[]): Promise<void> {
@@ -41,6 +51,13 @@ export class Application {
 
     await this.databaseClient.connect();
     this.logger.info('Database connection established');
+
+    if (!existsSync(this.config.uploadDirectory)) {
+      mkdirSync(this.config.uploadDirectory, { recursive: true });
+      this.logger.info(
+        `Upload directory created: ${this.config.uploadDirectory}`,
+      );
+    }
 
     this.registerMiddleware();
     this.logger.info('Middleware initialized');
@@ -53,7 +70,9 @@ export class Application {
     this.logger.info('Exception filter initialized');
 
     this.express.listen(this.config.port, () => {
-      this.logger.info(`Server started on http://localhost:${this.config.port}`);
+      this.logger.info(
+        `Server started on http://localhost:${this.config.port}`,
+      );
     });
   }
 }
