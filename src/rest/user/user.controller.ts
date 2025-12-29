@@ -21,26 +21,26 @@ export class UserController extends BaseController implements Controller {
   constructor(
     @inject(Component.UserService) private userService: IUserService,
     @inject(Component.Config) private config: Config,
-    @inject(Component.AuthService) private authService: AuthService
+    @inject(Component.AuthService) private authService: AuthService,
   ) {
     super('/users');
     this.addRoute({
       path: '/register',
       method: HttpMethod.Post,
       handler: this.create,
-      middlewares: [new ValidateDtoMiddleware(CreateUserDTO)]
+      middlewares: [new ValidateDtoMiddleware(CreateUserDTO)],
     });
     this.addRoute({
       path: '/login',
       method: HttpMethod.Post,
       handler: this.login,
-      middlewares: [new ValidateDtoMiddleware(LoginUserDTO)]
+      middlewares: [new ValidateDtoMiddleware(LoginUserDTO)],
     });
     this.addRoute({
       path: '/check',
       method: HttpMethod.Get,
       handler: this.checkAuth,
-      middlewares: [new PrivateRouteMiddleware(this.authService)]
+      middlewares: [new PrivateRouteMiddleware(this.authService)],
     });
     this.addRoute({
       path: '/:userId',
@@ -48,8 +48,8 @@ export class UserController extends BaseController implements Controller {
       handler: this.show,
       middlewares: [
         new ValidateObjectIdMiddleware('userId'),
-        new DocumentExistsMiddleware(this.userService, 'User', 'userId')
-      ]
+        new DocumentExistsMiddleware(this.userService, 'User', 'userId'),
+      ],
     });
     this.addRoute({
       path: '/:userId',
@@ -58,8 +58,8 @@ export class UserController extends BaseController implements Controller {
       middlewares: [
         new ValidateObjectIdMiddleware('userId'),
         new ValidateDtoMiddleware(UpdateUserDTO),
-        new DocumentExistsMiddleware(this.userService, 'User', 'userId')
-      ]
+        new DocumentExistsMiddleware(this.userService, 'User', 'userId'),
+      ],
     });
     this.addRoute({
       path: '/:userId/avatar',
@@ -68,12 +68,20 @@ export class UserController extends BaseController implements Controller {
       middlewares: [
         new ValidateObjectIdMiddleware('userId'),
         new UploadFileMiddleware(this.config.uploadDirectory, 'avatar'),
-        new DocumentExistsMiddleware(this.userService, 'User', 'userId')
-      ]
+        new DocumentExistsMiddleware(this.userService, 'User', 'userId'),
+      ],
     });
   }
 
   async create(req: Request, res: Response): Promise<void> {
+    const { email } = req.body;
+    const existingUser = await this.userService.findByEmail(email);
+
+    if (existingUser) {
+      this.sendConflict(res, `User with email ${email} already exists`);
+      return;
+    }
+
     const user = await this.userService.create(req.body);
     this.sendCreated(res, user);
   }
@@ -100,7 +108,9 @@ export class UserController extends BaseController implements Controller {
     }
 
     const avatarUrl = `/upload/${uploadFile.filename}`;
-    const updatedUser = await this.userService.updateById(userId, { avatarUrl });
+    const updatedUser = await this.userService.updateById(userId, {
+      avatarUrl,
+    });
     this.sendOk(res, updatedUser!);
   }
 
@@ -132,6 +142,11 @@ export class UserController extends BaseController implements Controller {
       return;
     }
 
-    this.sendOk(res, { email: user.email, name: user.name, avatarUrl: user.avatarUrl, type: user.type });
+    this.sendOk(res, {
+      email: user.email,
+      name: user.name,
+      avatarUrl: user.avatarUrl,
+      type: user.type,
+    });
   }
 }

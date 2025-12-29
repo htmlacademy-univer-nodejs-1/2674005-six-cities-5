@@ -5,15 +5,15 @@ import { createHash } from 'node:crypto';
 @modelOptions({
   schemaOptions: {
     timestamps: true,
-    collection: 'users'
-  }
+    collection: 'users',
+  },
 })
 export class UserEntity {
   @prop({
     required: true,
     unique: true,
     type: String,
-    match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
   })
   public email!: string;
 
@@ -21,7 +21,7 @@ export class UserEntity {
     required: true,
     type: String,
     minlength: 1,
-    maxlength: 15
+    maxlength: 15,
   })
   public name!: string;
 
@@ -29,52 +29,56 @@ export class UserEntity {
     required: true,
     type: String,
     minlength: 1,
-    maxlength: 15
+    maxlength: 15,
   })
   public lastName!: string;
 
   @prop({
     required: true,
-    type: String
+    type: String,
   })
   public password!: string;
 
   @prop({
-    required: true,
-    type: String
+    required: false,
+    type: String,
   })
-  public avatarUrl!: string;
+  public avatarUrl?: string;
 
   @prop({
     required: true,
     enum: UserType,
     type: String,
-    default: UserType.Standard
+    default: UserType.Standard,
   })
   public type!: UserType;
 
   @prop({
-    default: new Date()
+    default: new Date(),
   })
   public createdAt?: Date;
 
   @prop({
-    default: new Date()
+    default: new Date(),
   })
   public updatedAt?: Date;
 
   @prop({
     type: () => [String],
-    default: []
+    default: [],
   })
   public favoriteOffers!: string[];
 
   public setPassword(password: string, salt: string): void {
-    this.password = createHash('sha256').update(password + salt).digest('hex');
+    this.password = createHash('sha256')
+      .update(password + salt)
+      .digest('hex');
   }
 
   public verifyPassword(password: string, salt: string): boolean {
-    const hashPassword = createHash('sha256').update(password + salt).digest('hex');
+    const hashPassword = createHash('sha256')
+      .update(password + salt)
+      .digest('hex');
     return this.password === hashPassword;
   }
 }

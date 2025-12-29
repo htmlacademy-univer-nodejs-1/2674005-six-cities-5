@@ -1,5 +1,12 @@
 import { UserType } from '../../types/user-type.enum.js';
-import { IsEmail, IsString, IsEnum, Length, Matches } from 'class-validator';
+import {
+  IsEmail,
+  IsString,
+  IsEnum,
+  Length,
+  Matches,
+  IsOptional,
+} from 'class-validator';
 
 export class CreateUserDTO {
   @IsEmail({}, { message: 'email must be a valid email address' })
@@ -17,9 +24,10 @@ export class CreateUserDTO {
   @Length(6, 12, { message: 'password must be between 6 and 12 characters' })
   public password!: string;
 
-  @IsString({ message: 'avatarUrl is required' })
+  @IsOptional()
+  @IsString({ message: 'avatarUrl must be a string' })
   @Matches(/\.(jpg|png)$/i, { message: 'avatarUrl must be a jpg or png image' })
-  public avatarUrl!: string;
+  public avatarUrl?: string;
 
   @IsEnum(UserType, { message: 'type must be either common or pro' })
   public type!: UserType;

@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { injectable, inject } from 'inversify';
 import { BaseController } from '../base-controller.js';
 import { ICommentService } from '../../shared/models/comment/comment-service.interface.js';
+import { IOfferService } from '../../shared/models/offer/offer-service.interface.js';
 import { CreateCommentDTO } from '../../shared/models/comment/create-comment.dto.js';
 import { Component } from '../../shared/types/component.enum.js';
 import { Controller } from '../controller.interface.js';
@@ -15,14 +16,15 @@ import { AuthService } from '../../shared/libs/auth/auth-service.interface.js';
 export class CommentController extends BaseController implements Controller {
   constructor(
     @inject(Component.CommentService) private commentService: ICommentService,
-    @inject(Component.AuthService) private authService: AuthService
+    @inject(Component.OfferService) private offerService: IOfferService,
+    @inject(Component.AuthService) private authService: AuthService,
   ) {
     super('/comments');
     this.addRoute({
       path: '/:offerId',
       method: HttpMethod.Get,
       handler: this.index,
-      middlewares: [new ValidateObjectIdMiddleware('offerId')]
+      middlewares: [new ValidateObjectIdMiddleware('offerId')],
     });
     this.addRoute({
       path: '/',
@@ -30,8 +32,8 @@ export class CommentController extends BaseController implements Controller {
       handler: this.create,
       middlewares: [
         new PrivateRouteMiddleware(this.authService),
-        new ValidateDtoMiddleware(CreateCommentDTO)
-      ]
+        new ValidateDtoMiddleware(CreateCommentDTO),
+      ],
     });
   }
 
@@ -45,6 +47,11 @@ export class CommentController extends BaseController implements Controller {
     const dto: CreateCommentDTO = req.body;
     dto.userId = req.tokenPayload!.id;
     const comment = await this.commentService.create(dto);
+
+    await this.offerService.incCommentCount(dto.offerId);
+    const averageRating = await this.offerService.getAverageRating(dto.offerId);
+    await this.offerService.setAverageRating(dto.offerId, averageRating);
+
     this.sendCreated(res, comment);
   }
 }
